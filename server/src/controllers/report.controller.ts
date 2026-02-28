@@ -59,7 +59,11 @@ export async function createReport(req: AuthRequest, res: Response): Promise<voi
     await logEvent('REPORT_CREATED', req.user!.email, { reportId: report.id, zoneId: data.zoneId });
     res.status(201).json({ success: true, data: report });
   } catch (error: unknown) {
-    res.status(500).json({ success: false, error: 'Failed to create report' });
+    if (error instanceof Error && error.name === 'ZodError') {
+      res.status(400).json({ success: false, error: error.message });
+    } else {
+      res.status(500).json({ success: false, error: 'Failed to create report' });
+    }
   }
 }
 

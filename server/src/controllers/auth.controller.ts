@@ -5,6 +5,12 @@ import prisma from '../config/database.js';
 import { logEvent } from '../services/audit.service.js';
 import { registerSchema, loginSchema, validate } from '../utils/validators.js';
 
+function getJwtSecret(): string {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) throw new Error('JWT_SECRET environment variable is not set');
+  return secret;
+}
+
 export async function register(req: Request, res: Response): Promise<void> {
   try {
     const data = validate(registerSchema, req.body);
@@ -21,7 +27,7 @@ export async function register(req: Request, res: Response): Promise<void> {
     await logEvent('USER_REGISTERED', user.email, { userId: user.id, role: user.role });
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role },
-      process.env.JWT_SECRET || 'secret',
+      getJwtSecret(),
       { expiresIn: (process.env.JWT_EXPIRES_IN || '7d') as SignOptions['expiresIn'] }
     );
     res.status(201).json({ success: true, data: { user, token } });
@@ -45,7 +51,7 @@ export async function login(req: Request, res: Response): Promise<void> {
     await logEvent('USER_LOGIN', user.email, { userId: user.id });
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role },
-      process.env.JWT_SECRET || 'secret',
+      getJwtSecret(),
       { expiresIn: (process.env.JWT_EXPIRES_IN || '7d') as SignOptions['expiresIn'] }
     );
     const { password: _, ...userWithoutPassword } = user;

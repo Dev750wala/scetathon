@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-clean: #22c55e;
+  --color-attention: #f59e0b;
+  --color-critical: #ef4444;
+  --color-primary: #16a34a;
+}
+
+@layer base {
+  html {
+    font-family: Inter, system-ui, sans-serif;
+  }
+  body {
+    @apply bg-gray-50 text-gray-900;
+  }
+}
+
+@layer components {
+  .score-clean { @apply text-green-600 bg-green-50; }
+  .score-attention { @apply text-amber-600 bg-amber-50; }
+  .score-critical { @apply text-red-600 bg-red-50; }
+}

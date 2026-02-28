@@ -9,9 +9,14 @@ export function authenticate(req: AuthRequest, res: Response, next: NextFunction
     return;
   }
 
+  const jwtSecret = process.env.JWT_SECRET;
+  if (!jwtSecret) {
+    res.status(500).json({ success: false, error: 'Server configuration error' });
+    return;
+  }
   const token = authHeader.split(' ')[1];
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret') as JwtPayload;
+    const decoded = jwt.verify(token, jwtSecret) as JwtPayload;
     req.user = { id: decoded.id, email: decoded.email, name: '', role: decoded.role };
     next();
   } catch {
