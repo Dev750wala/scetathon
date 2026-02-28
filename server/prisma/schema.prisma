@@ -1,0 +1,206 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  STUDENT
+  SUPERVISOR
+  PIC
+}
+
+enum ZoneType {
+  RESTROOM
+  CANTEEN
+  CORRIDOR
+  CLASSROOM
+  GROUND
+  LAB
+}
+
+enum ReportCategory {
+  WASTE
+  SPILL
+  ODOR
+  GRAFFITI
+  BROKEN_FIXTURE
+  OTHER
+}
+
+enum ReportSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum ReportStatus {
+  OPEN
+  MERGED
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum JobStatus {
+  PENDING
+  ASSIGNED
+  IN_PROGRESS
+  COMPLETED
+  VERIFIED
+}
+
+enum Sentiment {
+  POSITIVE
+  NEUTRAL
+  NEGATIVE
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      UserRole
+  phone     String?
+  avatar    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  reports      Report[]    @relation("ReporterReports")
+  assignedJobs JobCard[]   @relation("AssignedWorker")
+  supervisedJobs JobCard[] @relation("Supervisor")
+  feedbacks    Feedback[]
+  escalationsResolved Escalation[]
+}
+
+model Zone {
+  id           String   @id @default(uuid())
+  name         String
+  description  String?
+  building     String
+  floor        String?
+  type         ZoneType
+  decayRate    Float    @default(0.01)
+  lastCleanedAt DateTime @default(now())
+  currentScore  Float   @default(100)
+  svgPathId    String?
+  latitude     Float?
+  longitude    Float?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  reports    Report[]
+  jobCards   JobCard[]
+  feedbacks  Feedback[]
+  insightCards InsightCard[]
+}
+
+model Report {
+  id             String         @id @default(uuid())
+  title          String
+  description    String
+  category       ReportCategory @default(OTHER)
+  severity       ReportSeverity @default(LOW)
+  status         ReportStatus   @default(OPEN)
+  imageUrl       String?
+  imageAnalysis  Json?
+  embedding      Json?
+  affectedCount  Int            @default(1)
+  isVerified     Boolean        @default(false)
+  zoneId         String
+  reporterId     String
+  assignedJobId  String?        @unique
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  zone           Zone           @relation(fields: [zoneId], references: [id])
+  reporter       User           @relation("ReporterReports", fields: [reporterId], references: [id])
+  jobCard        JobCard?       @relation("ReportJob")
+  feedbacks      Feedback[]
+  escalations    Escalation[]
+}
+
+model JobCard {
+  id                 String    @id @default(uuid())
+  status             JobStatus @default(PENDING)
+  assignedWorkerId   String?
+  supervisorId       String?
+  beforeImageUrl     String?
+  afterImageUrl      String?
+  afterImageVerified Boolean   @default(false)
+  notes              String?
+  startedAt          DateTime?
+  completedAt        DateTime?
+  verifiedAt         DateTime?
+  zoneId             String
+  reportId           String    @unique
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  zone           Zone     @relation(fields: [zoneId], references: [id])
+  report         Report   @relation("ReportJob", fields: [reportId], references: [id])
+  assignedWorker User?    @relation("AssignedWorker", fields: [assignedWorkerId], references: [id])
+  supervisor     User?    @relation("Supervisor", fields: [supervisorId], references: [id])
+  auditLogs      AuditLog[]
+}
+
+model Feedback {
+  id                String    @id @default(uuid())
+  cleanlinessRating Int
+  odorRating        Int
+  suppliesRating    Int
+  comment           String?
+  sentiment         Sentiment @default(NEUTRAL)
+  zoneId            String
+  userId            String
+  reportId          String?
+  createdAt         DateTime  @default(now())
+
+  zone   Zone    @relation(fields: [zoneId], references: [id])
+  user   User    @relation(fields: [userId], references: [id])
+  report Report? @relation(fields: [reportId], references: [id])
+}
+
+model AuditLog {
+  id           String   @id @default(uuid())
+  action       String
+  actor        String
+  data         Json
+  previousHash String
+  currentHash  String
+  jobCardId    String?
+  createdAt    DateTime @default(now())
+
+  jobCard JobCard? @relation(fields: [jobCardId], references: [id])
+}
+
+model InsightCard {
+  id              String   @id @default(uuid())
+  title           String
+  description     String
+  pattern         Json
+  confidence      Float
+  suggestedAction String
+  zoneId          String?
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+
+  zone Zone? @relation(fields: [zoneId], references: [id])
+}
+
+model Escalation {
+  id          String    @id @default(uuid())
+  reportId    String
+  level       Int
+  escalatedAt DateTime  @default(now())
+  resolvedAt  DateTime?
+  resolvedBy  String?
+
+  report   Report @relation(fields: [reportId], references: [id])
+  resolver User?  @relation(fields: [resolvedBy], references: [id])
+}
