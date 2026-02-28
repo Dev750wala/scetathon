@@ -1,17 +1,17 @@
-# 🧹 Swachh Campus 360
+# Swachh Campus 360
 
 > *"We don't just track cleanliness — we think about it."*
 
 | | |
 |---|---|
-| **Team Name** | [Team Name] |
+| **Team Name** | **Clawd Coders** |
 | **College** | Sarvajanik College of Engineering & Technology (SCET) |
-| **Hackathon** | [Hackathon Name] |
+| **Hackathon** | SCETATHON |
 | **Project** | Swachh Campus 360 — Campus Sanitation Intelligence Platform |
 
 ---
 
-## 📋 Table of Contents
+## Table of Contents
 
 1. [Problem Statement](#1-problem-statement)
 2. [Proposed Solution — Overview](#2-proposed-solution--overview)
@@ -100,7 +100,7 @@ The system enforces this hierarchy in every notification, permission check, and 
 
 ## 3. Feature Breakdown
 
-### 🔵 Core Features
+### Core Features
 
 #### 3.1 QR-Based Reporting System
 Every campus location — restroom, lab, corridor, canteen — has a unique **QR code** posted at the entrance. Students scan the code using any smartphone browser (no app install required) and are taken directly to a pre-tagged report form for that exact location.
@@ -179,8 +179,8 @@ This means that instead of 20 duplicate tickets from the canteen, the supervisor
 **On Task Completion:**
 - Worker uploads "after" photo when marking a job card complete
 - CV compares before and after images
-- Confirms resolution: "Area appears clean — ticket resolved ✅"
-- Flags disputed completion: "Conditions appear unchanged — flagged for supervisor review ⚠️"
+- Confirms resolution: "Area appears clean — ticket resolved "
+- Flags disputed completion: "Conditions appear unchanged — flagged for supervisor review "
 
 This creates a **closed-loop verification system** where completion is evidence-based, not self-reported.
 
@@ -369,7 +369,7 @@ graph TB
 
 ```mermaid
 flowchart TD
-    A["📱 Student scans QR code"] --> B["QR Landing Page\n(auto-tagged with Zone)"]
+    A["📱 Student scans QR code"] --> B["QR Landing Page (auto-tagged with Zone)"]
     B --> C{Input Method}
     C -->|Text| D["Text complaint form"]
     C -->|Voice| E["Web Speech API\ntranscription"]
